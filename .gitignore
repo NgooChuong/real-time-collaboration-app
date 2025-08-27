@@ -1,4 +1,47 @@
-.vscode
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-src/public/css/
-node_modules/
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# build outputs
+/build
+/dist
+
+# Next.js (safe to keep even if not used)
+/.next/
+/out/
+next-env.d.ts
+
+# misc
+.DS_Store
+*.pem
+
+# debug/logs
+/logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# local env files
+.env
+.env*.local
+
+# tool caches
+.eslintcache
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+
+# editors/IDE
+.idea/
+.vscode/
