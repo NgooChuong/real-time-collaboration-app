@@ -1,11 +1,22 @@
-import { Router } from 'express';
-import { login, register } from './auth.controller';
+import express, { Router } from 'express';
+import {
+  handleLogout,
+  handlePersistentLogin,
+  handleRefreshToken,
+  loginUser,
+  registerNewUser,
+} from './auth.controller';
 
-const router = Router();
+const authRouter: Router = express.Router();
 
-router.post('/login', login);
-router.post('/register', register);
+authRouter.post('/signup', registerNewUser);
 
-export default router;
+authRouter.post('/login', loginUser);
 
+authRouter.get('/refresh', handleRefreshToken);
 
+authRouter.get('/login/persist', handlePersistentLogin);
+
+authRouter.post('/logout', handleLogout);
+
+export default authRouter;

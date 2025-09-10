@@ -19,7 +19,7 @@ const options = {
   apis: ['./routes/*.js'],
 };
 const specs = swaggerJsdoc(options);
-const swaggerInit= (app: Express) => {
+const swaggerInit = (app: Express) => {
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 };
 export default swaggerInit;

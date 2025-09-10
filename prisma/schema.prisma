@@ -1,0 +1,91 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int             @id @default(autoincrement())
+  display_name   String?
+  username       String?         @unique
+  password       String
+  created_at     DateTime        @default(now())
+  updated_at     DateTime        @updatedAt
+  refresh_token  String?
+  profile_picture String?
+
+  // Relations
+  conversations  Conversation[]  @relation("OwnerConversations")
+  conversationUsers ConversationUser[]
+  messages       Message[]
+  reactions      Reaction[]
+}
+
+model Conversation {
+  id              Int              @id @default(autoincrement())
+  title           String?
+  created_at      DateTime         @default(now())
+  dateLastMessage DateTime?
+  isGroup         Boolean          @default(false)
+  ownerId         Int?
+  group_picture   String?
+
+  // Relations
+  owner           User?            @relation("OwnerConversations", fields: [ownerId], references: [id])
+  users           ConversationUser[]
+  messages        Message[]
+}
+
+model ConversationUser {
+  id              Int        @id @default(autoincrement())
+  userId          Int
+  conversationId  Int
+  isRead          Boolean    @default(true)
+  role            String?
+
+  // Relations
+  user            User        @relation(fields: [userId], references: [id])
+  conversation    Conversation @relation(fields: [conversationId], references: [id])
+  messages        Message[]
+}
+
+model Message {
+  id              Int        @id @default(autoincrement())
+  message         String?
+  authorId        Int
+  created_at      DateTime   @default(now())
+  conversationId  Int
+  isEdited        Boolean    @default(false)
+  img             String?
+  replyToId       Int?
+  conversationUserId Int?
+
+  // Relations
+  author          User        @relation(fields: [authorId], references: [id])
+  conversation    Conversation @relation(fields: [conversationId], references: [id])
+  conversationUser ConversationUser? @relation(fields: [conversationUserId], references: [id])
+  replyTo         Message?    @relation("ReplyThread", fields: [replyToId], references: [id])
+  replies         Message[]   @relation("ReplyThread")
+  reactions       Reaction[]
+}
+
+model Reaction {
+  id        Int     @id @default(autoincrement())
+  userId    Int
+  messageId Int
+  emoji     String?
+
+  // Relations
+  user      User    @relation(fields: [userId], references: [id])
+  message   Message @relation(fields: [messageId], references: [id])
+}
