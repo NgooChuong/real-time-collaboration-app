@@ -5,18 +5,33 @@ const options = {
   definition: {
     openapi: '3.1.0',
     info: {
-      title: 'eStore Express API with Swagger',
-      version: '0.1.0',
+      title: 'Real-time Collaboration App API',
+      version: '1.0.0',
       description:
-        'This is a simple CRUD API application made with Express and documented with Swagger',
+        'API for real-time collaboration application with authentication, messaging, and user management',
     },
     servers: [
       {
         url: 'http://localhost:3000',
+        description: 'Development server',
+      },
+    ],
+    components: {
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+    security: [
+      {
+        bearerAuth: [],
       },
     ],
   },
-  apis: ['./routes/*.js'],
+  apis: ['./src/routes/*.ts', './src/modules/*/*.ts'],
 };
 const specs = swaggerJsdoc(options);
 const swaggerInit = (app: Express) => {

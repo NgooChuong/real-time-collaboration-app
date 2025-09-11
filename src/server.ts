@@ -2,7 +2,6 @@ import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
 import registerMessagingSocket from './sockets/messaging.socket';
 import { allowedOrigins } from './config/allowedOrigins';
-import { connectDB } from './config/db';
 import { createApp } from './app';
 
 const port = Number(process.env.PORT) || 3000;
@@ -10,9 +9,6 @@ const port = Number(process.env.PORT) || 3000;
 // Initialize database connection
 const initializeServer = async () => {
   try {
-    // Connect to database
-    await connectDB();
-
     const app = createApp();
     const server = http.createServer(app);
 

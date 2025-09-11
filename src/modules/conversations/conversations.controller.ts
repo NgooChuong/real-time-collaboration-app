@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { prisma } from 'config';
-import { dbUser } from 'types';
+import { prisma } from '../../config/prisma';
+import { dbUser } from '../../types';
 
 const findConversationByParticipants = async (
   currUserId: string,

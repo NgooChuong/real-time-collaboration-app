@@ -10,6 +10,10 @@
     "resolveJsonModule": true,
     "rootDir": "src",
     "baseUrl": "src",
+    "paths": {
+      "config": ["config/index.ts"],
+      "types": ["types/index.ts"]
+    },
     "outDir": "dist"
   },
   "include": ["src"]

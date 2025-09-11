@@ -7,10 +7,10 @@ const activeUsers = new Set<number>();
 
 // Redis clients
 const subscriber = createClient({
-  url: process.env.REDIS_URL || 'redis://redis:6379',
+  url: process.env.REDIS_URL || 'redis://localhost:6379',
 });
 const publisher = createClient({
-  url: process.env.REDIS_URL || 'redis://redis:6379',
+  url: process.env.REDIS_URL || 'redis://localhost:6379',
 });
 
 subscriber.on('error', (err) => console.error('Redis Subscriber Error', err));

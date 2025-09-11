@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { prisma } from 'config';
-import { UserDetails } from 'types';
+import { prisma } from '../../config/prisma';
+import { UserDetails } from '../../types';
 
 export const getAllUsers = async (req: Request, res: Response) => {
   const search = (req.query.search as string) || '';
