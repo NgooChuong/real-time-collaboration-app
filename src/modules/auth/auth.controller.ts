@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { prisma } from 'config';
+import { env } from 'config/env';
 
 interface Token {
   userId: string;
@@ -40,13 +41,13 @@ export const registerNewUser = async (req: Request, res: Response) => {
 
     const accessToken = jwt.sign(
       { userId: user.id },
-      process.env.ACCESS_TOKEN_SECRET as string,
+      env.ACCESS_TOKEN_SECRET,
       { expiresIn: '900000' }, // 15 min
     );
 
     const refreshToken = jwt.sign(
       { userId: user.id },
-      process.env.REFRESH_TOKEN_SECRET as string,
+      env.REFRESH_TOKEN_SECRET,
       { expiresIn: '7d' },
     );
 
@@ -91,15 +92,13 @@ export const loginUser = async (req: Request, res: Response) => {
     if (!(await bcrypt.compare(password, user.password)))
       return res.status(400).json({ message: 'Incorrect password' });
 
-    const accessToken = jwt.sign(
-      { userId: user.id },
-      process.env.ACCESS_TOKEN_SECRET as string,
-      { expiresIn: '900000' },
-    );
+    const accessToken = jwt.sign({ userId: user.id }, env.ACCESS_TOKEN_SECRET, {
+      expiresIn: '900000',
+    });
 
     const refreshToken = jwt.sign(
       { userId: user.id },
-      process.env.REFRESH_TOKEN_SECRET as string,
+      env.REFRESH_TOKEN_SECRET,
       { expiresIn: '7d' },
     );
 
@@ -141,21 +140,17 @@ export const handleRefreshToken = async (req: Request, res: Response) => {
     });
     if (!user) return res.status(403).json({ message: 'Forbidden' });
 
-    jwt.verify(
-      refreshToken,
-      process.env.REFRESH_TOKEN_SECRET as string,
-      (err, decoded) => {
-        const userId = (decoded as Token).userId;
-        if (err || user.id.toString() !== userId.toString())
-          return res.status(403).json({ message: 'Forbidden' });
-        const accessToken = jwt.sign(
-          { userId: userId },
-          process.env.ACCESS_TOKEN_SECRET as string,
-          { expiresIn: '900000' }, // 15 mins
-        );
-        res.status(200).json({ accessToken });
-      },
-    );
+    jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET, (err, decoded) => {
+      const userId = (decoded as Token).userId;
+      if (err || user.id.toString() !== userId.toString())
+        return res.status(403).json({ message: 'Forbidden' });
+      const accessToken = jwt.sign(
+        { userId: userId },
+        env.ACCESS_TOKEN_SECRET,
+        { expiresIn: '900000' }, // 15 mins
+      );
+      res.status(200).json({ accessToken });
+    });
   } catch (err) {
     console.error(err);
   }
@@ -172,30 +167,26 @@ export const handlePersistentLogin = async (req: Request, res: Response) => {
     });
     if (!user) return res.status(403).json({ message: 'Forbidden' });
 
-    jwt.verify(
-      refreshToken,
-      process.env.REFRESH_TOKEN_SECRET as string,
-      (err, decoded) => {
-        const userId = (decoded as Token).userId;
-        if (err || user.id.toString() !== userId.toString())
-          return res.status(403).json({ message: 'Forbidden' });
-        const accessToken = jwt.sign(
-          { userId: userId },
-          process.env.ACCESS_TOKEN_SECRET as string,
-          { expiresIn: '900000' }, // 15 mins
-        );
+    jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET, (err, decoded) => {
+      const userId = (decoded as Token).userId;
+      if (err || user.id.toString() !== userId.toString())
+        return res.status(403).json({ message: 'Forbidden' });
+      const accessToken = jwt.sign(
+        { userId: userId },
+        env.ACCESS_TOKEN_SECRET,
+        { expiresIn: '900000' }, // 15 mins
+      );
 
-        const response = {
-          id: user.id,
-          display_name: user.display_name,
-          username: user.username,
-          accessToken,
-          profile_picture: user?.profile_picture,
-        };
+      const response = {
+        id: user.id,
+        display_name: user.display_name,
+        username: user.username,
+        accessToken,
+        profile_picture: user?.profile_picture,
+      };
 
-        res.status(200).json(response);
-      },
-    );
+      res.status(200).json(response);
+    });
   } catch (err) {
     console.error(err);
   }
