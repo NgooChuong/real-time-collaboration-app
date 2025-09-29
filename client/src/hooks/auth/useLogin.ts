@@ -10,7 +10,7 @@ const login = ({
 }: {
   username: string;
   password: string;
-}): Promise<AxiosResponse<User>> => {
+}): Promise<AxiosResponse<ApiResponse<User>>> => {
   return api.post(
     '/api/auth/login',
     { username, password },
@@ -24,7 +24,7 @@ const useLogin = () => {
 
   return useMutation(login, {
     onSuccess: (data) => {
-      setCurrentUser(data.data);
+      setCurrentUser(data.data.data);
       navigate('/');
     },
     onError: (err: AxiosError<{ message: string }>) => {

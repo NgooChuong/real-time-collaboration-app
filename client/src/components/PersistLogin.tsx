@@ -11,17 +11,21 @@ const PersistLogin = () => {
   useEffect(() => {
     const verifyRefreshToken = async () => {
       try {
-        const response = await api.get("/api/auth/login/persist", {
+        const response = await api.get<ApiResponse<User>>("/api/auth/login/persist", {
           withCredentials: true,
         });
-        setCurrentUser(response.data);
+        setCurrentUser(response.data.data); // Lấy user từ data.data vì response có cấu trúc ApiResponse
       } catch (err) {
         console.error(err);
       } finally {
         setIsLoading(false);
       }
     };
-    !currentUser?.accessToken ? verifyRefreshToken() : setIsLoading(false);
+    if (!currentUser?.accessToken) {
+      verifyRefreshToken();
+    } else {
+      setIsLoading(false);
+    }
   }, []);
 
   return (

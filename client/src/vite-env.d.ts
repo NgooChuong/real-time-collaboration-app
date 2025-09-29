@@ -1,4 +1,11 @@
 /// <reference types="vite/client" />
+
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message: string;
+}
+
 type User = {
   id: number;
   display_name: string;

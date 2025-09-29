@@ -1,39 +1,50 @@
 import { Request, Response } from 'express';
 import { prisma } from '../../config/prisma';
+import {
+  createMessageOrImageRequiredError,
+  createConversationIdRequiredError,
+  createUserNotParticipantError,
+  createErrorResponse,
+  createSuccessResponse,
+  throwIf,
+  isAppError,
+  createInternalServerError,
+  createMessageNotFoundError,
+  createCannotDeleteOthersMessagesError,
+  createCannotEditOthersMessagesError,
+  createMessageRequiredError,
+  throwIfNull,
+} from '../../exceptions';
 
 export const newMessage = async (req: Request, res: Response) => {
-  console.log('newMessage');
-  const { message, conversationId, img, replyToId } = req.body;
-
-  if ((!message || message.trim() === '') && (!img || img === ''))
-    return res
-      .status(400)
-      .json({ message: 'Must provide a message or include an image' });
-
-  if (!conversationId)
-    return res.status(400).json({ message: 'Must provide a conversationId' });
-
-  const authorId = req.userId;
-  const parsedAuthorId = parseInt(authorId);
-  const parsedConversationId = parseInt(conversationId);
-
   try {
+    const { message, conversationId, img, replyToId } = req.body;
+
+    // Validation
+    throwIf(
+      (!message || message.trim() === '') && (!img || img === ''),
+      createMessageOrImageRequiredError()
+    );
+    throwIf(!conversationId, createConversationIdRequiredError());
+
+    const authorId = req.userId;
+    const parsedAuthorId = parseInt(authorId);
+    const parsedConversationId = parseInt(conversationId);
+
     await prisma.$transaction(async (tx) => {
       const conversationUser = await tx.conversationUser.findFirst({
         where: { userId: parsedAuthorId, conversationId: parsedConversationId },
         select: { id: true },
       });
 
-      if (!conversationUser) {
-        throw new Error('User is not a participant in this conversation');
-      }
+      throwIf(!conversationUser, createUserNotParticipantError());
 
       const created = await tx.message.create({
         data: {
           message: message ?? null,
           authorId: parsedAuthorId,
           conversationId: parsedConversationId,
-          conversationUserId: conversationUser.id,
+          conversationUserId: conversationUser?.id,
           img: img || null,
           replyToId: replyToId ? parseInt(replyToId) : null,
         },
@@ -102,11 +113,15 @@ export const newMessage = async (req: Request, res: Response) => {
         repliedToMessage: repliedToMessage,
       };
 
-      res.status(200).json(response);
+      res.status(200).json(createSuccessResponse(response, 'Message sent successfully'));
     });
-  } catch (err) {
+  } catch (err: unknown) {
+    if (isAppError(err)) {
+      return res.status(err.statusCode).json(createErrorResponse(err));
+    }
     console.error(err);
-    res.status(500).json({ message: err });
+    const error = createInternalServerError();
+    res.status(error.statusCode).json(createErrorResponse(error));
   }
 };
 
@@ -114,28 +129,26 @@ export const getMessagesInConversation = async (
   req: Request,
   res: Response,
 ) => {
-  const { conversationId, page = 1, limit = 10 } = req.query;
-
-  if (!conversationId)
-    return res.status(400).json({ message: 'Must provide a conversationId' });
-
-  const currentUserId = req.userId;
-  const parsedCurrentUserId = parseInt(currentUserId as string);
-  const parsedConversationId = parseInt(conversationId as string);
-  const parsedPage = parseInt(page as string);
-  const parsedLimit = parseInt(limit as string);
-
   try {
+    const { conversationId, page = 1, limit = 10 } = req.query;
+
+    throwIf(!conversationId, createConversationIdRequiredError());
+
+    const currentUserId = req.userId;
+    const parsedCurrentUserId = parseInt(currentUserId as string);
+    const parsedConversationId = parseInt(conversationId as string);
+    const parsedPage = parseInt(page as string);
+    const parsedLimit = parseInt(limit as string);
+
     const conversationUserIds = await prisma.conversationUser.findMany({
       where: { conversationId: parsedConversationId },
       select: { userId: true },
     });
 
-    if (
-      !conversationUserIds.some((user) => user.userId === parsedCurrentUserId)
-    ) {
-      return res.status(401).json({ message: 'Unauthorized' });
-    }
+    throwIf(
+      !conversationUserIds.some((user) => user.userId === parsedCurrentUserId),
+      createUserNotParticipantError()
+    );
 
     await prisma.conversationUser.updateMany({
       where: {
@@ -209,64 +222,67 @@ export const getMessagesInConversation = async (
       };
     });
 
-    res.status(200).json(shaped);
-  } catch (err) {
+    res.status(200).json(createSuccessResponse(shaped, 'Messages retrieved successfully'));
+  } catch (err: unknown) {
+    if (isAppError(err)) {
+      return res.status(err.statusCode).json(createErrorResponse(err));
+    }
     console.error(err);
-    res.status(500).json({ message: err });
+    const error = createInternalServerError();
+    res.status(error.statusCode).json(createErrorResponse(error));
   }
 };
 
 export const deleteMessage = async (req: Request, res: Response) => {
-  const id = parseInt(req.params.id);
   try {
+    const id = parseInt(req.params.id);
     const message = await prisma.message.findUnique({
       where: { id },
       select: { authorId: true },
     });
 
-    if (message?.authorId !== parseInt(req.userId)) {
-      return res
-        .status(403)
-        .json({ message: 'You can only delete your own messages' });
-    }
-
-    if (!message) {
-      return res.status(404).json({ message: 'Message not found' });
-    }
+    throwIfNull(message, createMessageNotFoundError());
+    throwIf(
+      message?.authorId !== parseInt(req.userId),
+      createCannotDeleteOthersMessagesError()
+    );
 
     await prisma.message.delete({ where: { id } });
 
-    res
-      .status(200)
-      .json({ message: 'Message deleted successfully', messageId: id });
-  } catch (err) {
+    res.status(200).json(createSuccessResponse(
+      { messageId: id },
+      'Message deleted successfully'
+    ));
+  } catch (err: unknown) {
+    if (isAppError(err)) {
+      return res.status(err.statusCode).json(createErrorResponse(err));
+    }
     console.error(err);
-    res.status(500).json({ message: err });
+    const error = createInternalServerError();
+    res.status(error.statusCode).json(createErrorResponse(error));
   }
 };
 
 export const editMessage = async (req: Request, res: Response) => {
-  const { message: newMessageBody } = req.body;
-
-  if (!newMessageBody || newMessageBody.trim() === '')
-    return res.status(400).json({ message: 'Must provide a message' });
-
-  const id = parseInt(req.params.id);
   try {
+    const { message: newMessageBody } = req.body;
+
+    throwIf(
+      !newMessageBody || newMessageBody.trim() === '',
+      createMessageRequiredError()
+    );
+
+    const id = parseInt(req.params.id);
     const message = await prisma.message.findUnique({
       where: { id },
       select: { authorId: true },
     });
 
-    if (!message) {
-      return res.status(404).json({ message: 'Message not found' });
-    }
-
-    if (message?.authorId !== parseInt(req.userId)) {
-      return res
-        .status(403)
-        .json({ message: 'You can only edit your own messages' });
-    }
+    throwIfNull(message, createMessageNotFoundError());
+    throwIf(
+      message?.authorId !== parseInt(req.userId),
+      createCannotEditOthersMessagesError()
+    );
 
     const updatedMessage = await prisma.message.update({
       where: { id },
@@ -282,10 +298,14 @@ export const editMessage = async (req: Request, res: Response) => {
       },
     });
 
-    res.status(200).json(updatedMessage);
-  } catch (err) {
+    res.status(200).json(createSuccessResponse(updatedMessage, 'Message edited successfully'));
+  } catch (err: unknown) {
+    if (isAppError(err)) {
+      return res.status(err.statusCode).json(createErrorResponse(err));
+    }
     console.error(err);
-    res.status(500).json(err);
+    const error = createInternalServerError();
+    res.status(error.statusCode).json(createErrorResponse(error));
   }
 };
 

@@ -21,6 +21,7 @@ export const useGetMessages = (conversationId: number) => {
       const res = await axiosPrivate.get('/api/messages', {
         params: { conversationId },
       });
+      console.log("aaaaaaaaaaaaaaaa" ,res.data);
       return res.data;
     },
     {

@@ -12,15 +12,39 @@ import { useLocation } from "react-router-dom";
 import { InfiniteData, useQueryClient } from "@tanstack/react-query";
 import { useReadConversation } from "../hooks/useConversations";
 
+interface Reaction {
+  id: number;
+  messageId: number;
+  emoji: string;
+  count: number;
+}
+
+type Message = {
+  id: number;
+  conversationId: number;
+  authorId: number;
+  message: string;
+  img: string;
+  created_at: Date | string;  // Can be either Date or ISO string
+  replyToId?: number;
+  repliedToMessage?: Message;
+  reactions: Reaction[];
+  isEdited: boolean;
+};
+
 type SocketContextType = {
   socket: Socket | undefined;
   onlineUserIds: number[];
 };
 
-const SocketContext = createContext<any>(undefined);
+const SocketContext = createContext<SocketContextType | undefined>(undefined);
 
 export const useSocket = (): SocketContextType => {
-  return useContext(SocketContext);
+  const context = useContext(SocketContext);
+  if (context === undefined) {
+    throw new Error('useSocket must be used within a SocketProvider');
+  }
+  return context;
 };
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
@@ -57,7 +81,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
   }, [location]);
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser?.id) {
       const newSocket = io(WS_URL, {
         transports: ["websocket"],
         query: { id: currentUser.id.toString() },
@@ -78,7 +102,7 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
       setOnlineUserIds((prev) => [...prev, userId]);
     const handleUserDisconnected = (userId: number) =>
       setOnlineUserIds((prev) => prev.filter((id) => id !== userId));
-    const handleReceiveMessage = (receivedMessage: any) => {
+    const handleReceiveMessage = (receivedMessage: Omit<Message, 'reactions' | 'isEdited'> & { timeSent: string }) => {
       const {
         id,
         conversationId,
@@ -114,11 +138,13 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
               id,
               message,
               img,
-              created_at: timeSent,
+              created_at: new Date(timeSent),
             },
             isRead: isViewingConversation,
           };
-          isViewingConversation && readConversation(conversationId);
+          if (isViewingConversation) {
+            readConversation(conversationId);
+          }
           const updatedConversations = [...prevConversations!];
           updatedConversations[conversationIndex] = updatedConversation;
           console.log("UPDATED CONVERSATIONS (NEW):", updatedConversations);
@@ -133,11 +159,12 @@ export const SocketProvider = ({ children }: { children: ReactNode }) => {
           const pages = prevData?.pages.map((page) => [...page]);
           pages[0].unshift({
             id,
+            conversationId,
             message,
             img,
             authorId,
             reactions: [],
-            created_at: timeSent,
+            created_at: new Date(timeSent),
             isEdited: false,
             replyToId,
             repliedToMessage,

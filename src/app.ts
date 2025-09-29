@@ -4,6 +4,7 @@ import cookieParser from 'cookie-parser';
 import swaggerInit from './config';
 import { corsOptions } from './config/corsOptions';
 import { credentials } from './middleware/credentials';
+import { globalErrorHandler, notFoundHandler } from './exceptions';
 import authRouter from './modules/auth/auth.routes';
 import usersRouter from './modules/users/users.routes';
 import messagesRouter from './modules/messages/messages.routes';
@@ -31,6 +32,10 @@ export const createApp = (): Express => {
   app.get('/health', (_req, res) => {
     res.json({ status: 'ok' });
   });
+
+  // Error handling middleware (must be last)
+  app.use(notFoundHandler);
+  app.use(globalErrorHandler);
 
   return app;
 };

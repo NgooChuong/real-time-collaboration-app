@@ -1,4 +1,9 @@
 import { Request, Response } from 'express';
+import {
+  createInternalServerError,
+  createNotFoundError,
+  throwIf,
+} from '../../exceptions';
 import { prisma } from '../../config/prisma';
 import { dbUser } from '../../types';
 
@@ -283,7 +288,7 @@ export const updateConversation = async (req: Request, res: Response) => {
     return res.status(200).json(updated);
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ message: err });
+    throw createInternalServerError(typeof err === 'string' ? err : (err as Error).message);
   }
 };
 
@@ -296,12 +301,10 @@ export const deleteConversation = async (req: Request, res: Response) => {
       select: { id: true, isGroup: true, ownerId: true },
     });
 
-    if (!conversation) {
-      return res.status(404).json({ message: 'Conversation not found' });
-    }
+    throwIf(!conversation, createNotFoundError('Conversation not found'));
 
     // Leave group conversation
-    if (conversation.isGroup && conversation.ownerId !== parseInt(req.userId)) {
+    if (conversation && conversation.isGroup && conversation.ownerId !== parseInt(req.userId)) {
       await prisma.conversationUser.deleteMany({
         where: {
           conversationId: parsedConversationId,
@@ -317,6 +320,6 @@ export const deleteConversation = async (req: Request, res: Response) => {
     res.status(200).json({ message: 'Conversation deleted successfully' });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: err });
+    throw createInternalServerError(typeof err === 'string' ? err : (err as Error).message);
   }
 };
