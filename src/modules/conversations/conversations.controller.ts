@@ -288,7 +288,9 @@ export const updateConversation = async (req: Request, res: Response) => {
     return res.status(200).json(updated);
   } catch (err) {
     console.error(err);
-    throw createInternalServerError(typeof err === 'string' ? err : (err as Error).message);
+    throw createInternalServerError(
+      typeof err === 'string' ? err : (err as Error).message,
+    );
   }
 };
 
@@ -304,7 +306,11 @@ export const deleteConversation = async (req: Request, res: Response) => {
     throwIf(!conversation, createNotFoundError('Conversation not found'));
 
     // Leave group conversation
-    if (conversation && conversation.isGroup && conversation.ownerId !== parseInt(req.userId)) {
+    if (
+      conversation &&
+      conversation.isGroup &&
+      conversation.ownerId !== parseInt(req.userId)
+    ) {
       await prisma.conversationUser.deleteMany({
         where: {
           conversationId: parsedConversationId,
@@ -320,6 +326,8 @@ export const deleteConversation = async (req: Request, res: Response) => {
     res.status(200).json({ message: 'Conversation deleted successfully' });
   } catch (err) {
     console.error(err);
-    throw createInternalServerError(typeof err === 'string' ? err : (err as Error).message);
+    throw createInternalServerError(
+      typeof err === 'string' ? err : (err as Error).message,
+    );
   }
 };

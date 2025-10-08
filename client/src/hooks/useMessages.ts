@@ -21,7 +21,7 @@ export const useGetMessages = (conversationId: number) => {
       const res = await axiosPrivate.get('/api/messages', {
         params: { conversationId },
       });
-      console.log("aaaaaaaaaaaaaaaa" ,res.data);
+      console.log('aaaaaaaaaaaaaaaa', res.data);
       return res.data;
     },
     {
@@ -43,14 +43,14 @@ export const useGetMessagesInfinite = (conversationId: number, limit = 20) => {
   return useInfiniteQuery<Message[]>(
     ['messages', conversationId],
     async ({ pageParam = 1 }) => {
-      const res = await axiosPrivate.get('/api/messages', {
+      const res = await axiosPrivate.get<ApiResponse<Message[]>>('/api/messages', {
         params: {
           conversationId,
           page: pageParam,
           limit: limit,
         },
       });
-      return res.data;
+      return res.data.data;
     },
     {
       // Avoid refetching when navigating back if data exists in cache
@@ -110,13 +110,13 @@ export const useNewMessage = (
 
   return useMutation<Message>(
     async () => {
-      const res = await axiosPrivate.post('/api/messages/new', {
+      const res = await axiosPrivate.post<ApiResponse<Message>>('/api/messages/new', {
         message: message,
         conversationId: conversationId,
         img: img,
         replyToId: replyToId,
       });
-      return res.data;
+      return res.data.data;
     },
     {
       onSuccess: (data) => {
@@ -179,8 +179,8 @@ export const useDeleteMessage = (conversationId: number) => {
 
   return useMutation(
     async (messageId: number) => {
-      const res = await axiosPrivate.delete(`/api/messages/${messageId}`);
-      return res.data;
+      const res = await axiosPrivate.delete<ApiResponse<{ messageId: number }>>(`/api/messages/${messageId}`);
+      return res.data.data;
     },
     {
       onSuccess: (data) => {

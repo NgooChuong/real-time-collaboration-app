@@ -23,7 +23,7 @@ export const newMessage = async (req: Request, res: Response) => {
     // Validation
     throwIf(
       (!message || message.trim() === '') && (!img || img === ''),
-      createMessageOrImageRequiredError()
+      createMessageOrImageRequiredError(),
     );
     throwIf(!conversationId, createConversationIdRequiredError());
 
@@ -113,7 +113,9 @@ export const newMessage = async (req: Request, res: Response) => {
         repliedToMessage: repliedToMessage,
       };
 
-      res.status(200).json(createSuccessResponse(response, 'Message sent successfully'));
+      res
+        .status(200)
+        .json(createSuccessResponse(response, 'Message sent successfully'));
     });
   } catch (err: unknown) {
     if (isAppError(err)) {
@@ -147,7 +149,7 @@ export const getMessagesInConversation = async (
 
     throwIf(
       !conversationUserIds.some((user) => user.userId === parsedCurrentUserId),
-      createUserNotParticipantError()
+      createUserNotParticipantError(),
     );
 
     await prisma.conversationUser.updateMany({
@@ -222,7 +224,9 @@ export const getMessagesInConversation = async (
       };
     });
 
-    res.status(200).json(createSuccessResponse(shaped, 'Messages retrieved successfully'));
+    res
+      .status(200)
+      .json(createSuccessResponse(shaped, 'Messages retrieved successfully'));
   } catch (err: unknown) {
     if (isAppError(err)) {
       return res.status(err.statusCode).json(createErrorResponse(err));
@@ -244,15 +248,19 @@ export const deleteMessage = async (req: Request, res: Response) => {
     throwIfNull(message, createMessageNotFoundError());
     throwIf(
       message?.authorId !== parseInt(req.userId),
-      createCannotDeleteOthersMessagesError()
+      createCannotDeleteOthersMessagesError(),
     );
 
     await prisma.message.delete({ where: { id } });
 
-    res.status(200).json(createSuccessResponse(
-      { messageId: id },
-      'Message deleted successfully'
-    ));
+    res
+      .status(200)
+      .json(
+        createSuccessResponse(
+          { messageId: id },
+          'Message deleted successfully',
+        ),
+      );
   } catch (err: unknown) {
     if (isAppError(err)) {
       return res.status(err.statusCode).json(createErrorResponse(err));
@@ -269,7 +277,7 @@ export const editMessage = async (req: Request, res: Response) => {
 
     throwIf(
       !newMessageBody || newMessageBody.trim() === '',
-      createMessageRequiredError()
+      createMessageRequiredError(),
     );
 
     const id = parseInt(req.params.id);
@@ -281,7 +289,7 @@ export const editMessage = async (req: Request, res: Response) => {
     throwIfNull(message, createMessageNotFoundError());
     throwIf(
       message?.authorId !== parseInt(req.userId),
-      createCannotEditOthersMessagesError()
+      createCannotEditOthersMessagesError(),
     );
 
     const updatedMessage = await prisma.message.update({
@@ -298,7 +306,11 @@ export const editMessage = async (req: Request, res: Response) => {
       },
     });
 
-    res.status(200).json(createSuccessResponse(updatedMessage, 'Message edited successfully'));
+    res
+      .status(200)
+      .json(
+        createSuccessResponse(updatedMessage, 'Message edited successfully'),
+      );
   } catch (err: unknown) {
     if (isAppError(err)) {
       return res.status(err.statusCode).json(createErrorResponse(err));

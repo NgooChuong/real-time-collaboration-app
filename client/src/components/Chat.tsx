@@ -96,11 +96,11 @@ const Chat = () => {
 
   const updateMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (message.trim() === "") {
+    if (message.trim() === "" || !messageToEdit?.id) {
       setMessage("");
       return;
     }
-    editMessage({ messageId: messageToEdit?.id!, message });
+    editMessage({ messageId: messageToEdit.id, message });
   };
 
   useEffect(() => {
@@ -170,7 +170,8 @@ const Chat = () => {
           ref={messagesContainerRef}
           className="grid gap-2 p-2 overflow-y-auto"
         >
-          {messages?.pages[messages.pages.length - 1].length! >= LIMIT && (
+          {messages?.pages && messages.pages.length > 0 && 
+           (messages.pages[messages.pages.length - 1]?.length ?? 0) >= LIMIT && (
             <button
               onClick={() => {
                 setShowMoreClicked(true);

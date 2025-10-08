@@ -11,11 +11,11 @@ export type AppError = {
 export const createAppError = (
   message: string,
   statusCode: HttpStatusCodes,
-  errorType: ErrorTypes = ErrorTypes.INTERNAL_ERROR
+  errorType: ErrorTypes = ErrorTypes.INTERNAL_ERROR,
 ): AppError => {
   const error = new Error(message);
   Error.captureStackTrace(error, createAppError);
-  
+
   return {
     message,
     statusCode,

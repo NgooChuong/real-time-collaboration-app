@@ -25,7 +25,7 @@ export const verifyJWT = (req: Request, res: Response, next: NextFunction) => {
       const error = createUnauthorizedError();
       return res.status(error.statusCode).json(createErrorResponse(error));
     }
-    
+
     const token = authHeader.split(' ')[1];
     jwt.verify(token, env.ACCESS_TOKEN_SECRET, (err, decoded) => {
       if (err) {

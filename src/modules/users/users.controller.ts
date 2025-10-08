@@ -32,11 +32,16 @@ export const getAllUsers = async (req: Request, res: Response) => {
       take: parsedLimit,
       skip: (parsedPage - 1) * parsedLimit,
     });
-    
-    res.status(200).json(createSuccessResponse({
-      users: users as unknown as UserDetails[],
-      numFound: users.length,
-    }, 'Users retrieved successfully'));
+
+    res.status(200).json(
+      createSuccessResponse(
+        {
+          users: users as unknown as UserDetails[],
+          numFound: users.length,
+        },
+        'Users retrieved successfully',
+      ),
+    );
   } catch (err: unknown) {
     if (isAppError(err)) {
       return res.status(err.statusCode).json(createErrorResponse(err));
@@ -86,7 +91,12 @@ export const editUser = async (req: Request, res: Response) => {
     res.json(createSuccessResponse(response, 'User updated successfully'));
   } catch (err: unknown) {
     console.error(err);
-    if (err && typeof err === 'object' && 'code' in err && err.code === 'P2002') {
+    if (
+      err &&
+      typeof err === 'object' &&
+      'code' in err &&
+      err.code === 'P2002'
+    ) {
       const error = createUsernameAlreadyInUseError();
       return res.status(error.statusCode).json(createErrorResponse(error));
     }

@@ -28,6 +28,7 @@ const MessageDropdown: FC<MessageDropdownProps> = ({
       setShowDropdown={setShowDropdown}
       toggleBtnRef={toggleBtnRef}
       orientation="horizontal"
+      
     >
       <DropdownItem
         icon={<FiCornerUpLeft />}

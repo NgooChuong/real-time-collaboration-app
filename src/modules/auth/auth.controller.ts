@@ -27,7 +27,10 @@ export const registerNewUser = async (req: Request, res: Response) => {
     const { display_name, username, password } = req.body;
 
     // Validation
-      throwIf(!display_name || display_name === '', createRequiredFieldError('Display name'));
+    throwIf(
+      !display_name || display_name === '',
+      createRequiredFieldError('Display name'),
+    );
     throwIf(!username || username === '', createRequiredFieldError('Username'));
     throwIf(!password || password === '', createRequiredFieldError('Password'));
 
@@ -80,7 +83,9 @@ export const registerNewUser = async (req: Request, res: Response) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.status(200).json(createSuccessResponse(response, 'Registration successful'));
+    res
+      .status(200)
+      .json(createSuccessResponse(response, 'Registration successful'));
   } catch (err: unknown) {
     if (isAppError(err)) {
       return res.status(err.statusCode).json(createErrorResponse(err));
@@ -102,12 +107,19 @@ export const loginUser = async (req: Request, res: Response) => {
     const user = await prisma.user.findUnique({ where: { username } });
     throwIfNull(user, createUserNotFoundError());
 
-    const isPasswordValid = await bcrypt.compare(password, user?.password as string);
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      user?.password as string,
+    );
     throwIf(!isPasswordValid, createIncorrectPasswordError());
 
-    const accessToken = jwt.sign({ userId: user?.id }, env.ACCESS_TOKEN_SECRET, {
-      expiresIn: '900000',
-    });
+    const accessToken = jwt.sign(
+      { userId: user?.id },
+      env.ACCESS_TOKEN_SECRET,
+      {
+        expiresIn: '900000',
+      },
+    );
 
     const refreshToken = jwt.sign(
       { userId: user?.id },
@@ -159,20 +171,31 @@ export const handleRefreshToken = async (req: Request, res: Response) => {
 
     jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET, (err, decoded) => {
       if (err) {
-        return res.status(403).json(createErrorResponse(createForbiddenError()));
+        return res
+          .status(403)
+          .json(createErrorResponse(createForbiddenError()));
       }
-      
+
       const userId = (decoded as Token).userId;
       if (user?.id.toString() !== userId.toString()) {
-        return res.status(403).json(createErrorResponse(createForbiddenError()));
+        return res
+          .status(403)
+          .json(createErrorResponse(createForbiddenError()));
       }
-      
+
       const accessToken = jwt.sign(
         { userId: userId },
         env.ACCESS_TOKEN_SECRET,
         { expiresIn: '900000' }, // 15 mins
       );
-      res.status(200).json(createSuccessResponse({ accessToken }, 'Token refreshed successfully'));
+      res
+        .status(200)
+        .json(
+          createSuccessResponse(
+            { accessToken },
+            'Token refreshed successfully',
+          ),
+        );
     });
   } catch (err: unknown) {
     if (isAppError(err)) {
@@ -197,14 +220,18 @@ export const handlePersistentLogin = async (req: Request, res: Response) => {
 
     jwt.verify(refreshToken, env.REFRESH_TOKEN_SECRET, (err, decoded) => {
       if (err) {
-        return res.status(403).json(createErrorResponse(createForbiddenError()));
+        return res
+          .status(403)
+          .json(createErrorResponse(createForbiddenError()));
       }
-      
+
       const userId = (decoded as Token).userId;
       if (user?.id.toString() !== userId.toString()) {
-        return res.status(403).json(createErrorResponse(createForbiddenError()));
+        return res
+          .status(403)
+          .json(createErrorResponse(createForbiddenError()));
       }
-      
+
       const accessToken = jwt.sign(
         { userId: userId },
         env.ACCESS_TOKEN_SECRET,
@@ -244,7 +271,7 @@ export const handleLogout = async (req: Request, res: Response) => {
       res.clearCookie('jwt', {
         httpOnly: true,
         sameSite: 'none',
-        secure: true
+        secure: true,
       });
       return res.status(204);
     }
@@ -258,7 +285,7 @@ export const handleLogout = async (req: Request, res: Response) => {
     res.clearCookie('jwt', {
       httpOnly: true,
       sameSite: 'none',
-      secure: true
+      secure: true,
     });
     res.sendStatus(204);
   } catch (err) {

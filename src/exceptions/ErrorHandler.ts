@@ -4,7 +4,11 @@ import { HttpStatusCodes } from './HttpStatusCodes';
 import { ErrorTypes } from './ErrorTypes';
 import { logger } from '../utils/logger';
 
-export const globalErrorHandler = (err: Error | AppError, _req: Request, res: Response) => {
+export const globalErrorHandler = (
+  err: Error | AppError,
+  _req: Request,
+  res: Response,
+) => {
   logger.error('Error occurred:', err);
 
   if (isAppError(err)) {
@@ -76,7 +80,9 @@ export const globalErrorHandler = (err: Error | AppError, _req: Request, res: Re
   });
 };
 
-export const asyncHandler = (fn: (req: Request, res: Response, next: NextFunction) => Promise<void>) => {
+export const asyncHandler = (
+  fn: (req: Request, res: Response, next: NextFunction) => Promise<void>,
+) => {
   return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };

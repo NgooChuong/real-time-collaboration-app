@@ -15,5 +15,5 @@ export const env = {
       ? 'redis://redis:6379'
       : 'redis://localhost:6379'),
 };
-console.log("env", env);
+console.log('env', env);
 export default env;

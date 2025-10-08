@@ -1,5 +1,5 @@
 import clsx, { ClassValue } from "clsx";
-import React, { useRef, useState, useLayoutEffect, ReactNode, FC, HTMLAttributes } from "react";
+import React, { useRef, useState, useLayoutEffect, ReactNode, FC } from "react";
 import { twMerge } from "tw-merge";
 
 interface DropdownItemProps {
