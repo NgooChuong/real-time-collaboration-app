@@ -6,9 +6,12 @@ const useSearch = (query: string) => {
   return useQuery<SearchResults>(
     ['searchUsers', query.trim()],
     async () => {
-      const res = await axiosPrivate.get<ApiResponse<SearchResults>>('/api/users', {
-        params: { search: query.trim() },
-      });
+      const res = await axiosPrivate.get<ApiResponse<SearchResults>>(
+        '/api/users',
+        {
+          params: { search: query.trim() },
+        },
+      );
       return res.data.data;
     },
     { enabled: query.trim() !== '' },
