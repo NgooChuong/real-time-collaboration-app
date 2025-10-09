@@ -53,7 +53,7 @@
     "dev": "ts-node-dev -r tsconfig-paths/register src/server.ts",
     "migrate": "prisma migrate dev",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "husky",
+    "prepare": "husky install || true",
     "lint": "eslint \"**/{src,apps,libs,test}/**/*.ts\" \"*.js\" --fix",
     "format": "prettier --write \"**/src/**/*.ts\"",
     "format:test": "prettier --write \"**/test/**/*.ts\""
