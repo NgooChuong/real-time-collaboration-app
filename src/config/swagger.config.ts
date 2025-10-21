@@ -15,6 +15,10 @@ const options = {
         url: 'http://localhost:3000',
         description: 'Development server',
       },
+      {
+        url: 'https://real-time-collaboration-app-d8lx.onrender.com',
+        description: 'Production server',
+      },
     ],
     components: {
       securitySchemes: {

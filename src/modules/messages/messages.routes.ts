@@ -12,7 +12,7 @@ const messagesRouter: Router = express.Router();
 
 /**
  * @swagger
- * /messages/new:
+ * /api/messages/new:
  *   post:
  *     summary: Send a new message
  *     tags: [Messages]
@@ -26,20 +26,62 @@ const messagesRouter: Router = express.Router();
  *             type: object
  *             required:
  *               - conversationId
- *               - content
  *             properties:
  *               conversationId:
  *                 type: number
  *                 description: ID of the conversation
- *               content:
+ *               message:
  *                 type: string
- *                 description: Message content
- *               recipientId:
+ *                 description: Message content (optional if img provided)
+ *               img:
+ *                 type: string
+ *                 description: Image (optional if message provided)
+ *               replyToId:
  *                 type: number
- *                 description: ID of the recipient (for direct messages)
+ *                 description: ID of the message being replied to (optional)
  *     responses:
- *       201:
+ *       200:
  *         description: Message sent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: number
+ *                     message:
+ *                       type: string
+ *                     img:
+ *                       type: string
+ *                     authorId:
+ *                       type: number
+ *                     created_at:
+ *                       type: string
+ *                       format: date-time
+ *                     replyToId:
+ *                       type: number
+ *                       nullable: true
+ *                     repliedToMessage:
+ *                       type: object
+ *                       nullable: true
+ *                       properties:
+ *                         id:
+ *                           type: number
+ *                         message:
+ *                           type: string
+ *                         img:
+ *                           type: string
+ *                         authorId:
+ *                           type: number
+ *                         authorDisplayName:
+ *                           type: string
+ *                 message:
+ *                   type: string
  *       400:
  *         description: Bad request
  *       401:
@@ -49,7 +91,7 @@ messagesRouter.post('/new', verifyJWT, newMessage);
 
 /**
  * @swagger
- * /messages:
+ * /api/messages:
  *   get:
  *     summary: Get messages in a conversation
  *     tags: [Messages]
@@ -72,7 +114,7 @@ messagesRouter.post('/new', verifyJWT, newMessage);
  *         name: limit
  *         schema:
  *           type: number
- *           default: 50
+ *           default: 10
  *         description: Number of messages per page
  *     responses:
  *       200:
@@ -82,36 +124,58 @@ messagesRouter.post('/new', verifyJWT, newMessage);
  *             schema:
  *               type: object
  *               properties:
- *                 messages:
+ *                 success:
+ *                   type: boolean
+ *                 data:
  *                   type: array
  *                   items:
  *                     type: object
  *                     properties:
  *                       id:
  *                         type: number
- *                       content:
+ *                       message:
  *                         type: string
- *                       createdAt:
+ *                       img:
+ *                         type: string
+ *                       authorId:
+ *                         type: number
+ *                       created_at:
  *                         type: string
  *                         format: date-time
- *                       sender:
+ *                       isEdited:
+ *                         type: boolean
+ *                       conversationId:
+ *                         type: number
+ *                       conversationUserId:
+ *                         type: number
+ *                       replyToId:
+ *                         type: number
+ *                         nullable: true
+ *                       repliedToMessage:
  *                         type: object
+ *                         nullable: true
  *                         properties:
  *                           id:
  *                             type: number
- *                           firstName:
+ *                           message:
  *                             type: string
- *                           lastName:
+ *                           img:
  *                             type: string
- *                 pagination:
- *                   type: object
- *                   properties:
- *                     page:
- *                       type: number
- *                     limit:
- *                       type: number
- *                     total:
- *                       type: number
+ *                           authorId:
+ *                             type: number
+ *                           authorDisplayName:
+ *                             type: string
+ *                       reactions:
+ *                         type: array
+ *                         items:
+ *                           type: object
+ *                           properties:
+ *                             emoji:
+ *                               type: string
+ *                             count:
+ *                               type: number
+ *                 message:
+ *                   type: string
  *       401:
  *         description: Unauthorized
  */
@@ -119,7 +183,7 @@ messagesRouter.get('/', verifyJWT, getMessagesInConversation);
 
 /**
  * @swagger
- * /messages/{id}:
+ * /api/messages/{id}:
  *   delete:
  *     summary: Delete a message
  *     tags: [Messages]
@@ -135,6 +199,20 @@ messagesRouter.get('/', verifyJWT, getMessagesInConversation);
  *     responses:
  *       200:
  *         description: Message deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     messageId:
+ *                       type: number
+ *                 message:
+ *                   type: string
  *       401:
  *         description: Unauthorized
  *       404:
@@ -142,7 +220,7 @@ messagesRouter.get('/', verifyJWT, getMessagesInConversation);
  */
 /**
  * @swagger
- * /messages/{id}:
+ * /api/messages/{id}:
  *   put:
  *     summary: Edit a message
  *     tags: [Messages]
@@ -162,14 +240,41 @@ messagesRouter.get('/', verifyJWT, getMessagesInConversation);
  *           schema:
  *             type: object
  *             required:
- *               - content
+ *               - message
  *             properties:
- *               content:
+ *               message:
  *                 type: string
  *                 description: New message content
  *     responses:
  *       200:
  *         description: Message updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: number
+ *                     message:
+ *                       type: string
+ *                     img:
+ *                       type: string
+ *                     authorId:
+ *                       type: number
+ *                     created_at:
+ *                       type: string
+ *                       format: date-time
+ *                     isEdited:
+ *                       type: boolean
+ *                     conversationId:
+ *                       type: number
+ *                 message:
+ *                   type: string
  *       401:
  *         description: Unauthorized
  *       404:
@@ -182,7 +287,7 @@ messagesRouter
 
 /**
  * @swagger
- * /messages/{id}/react:
+ * /api/messages/{id}/react:
  *   put:
  *     summary: React to a message
  *     tags: [Messages]
@@ -202,15 +307,33 @@ messagesRouter
  *           schema:
  *             type: object
  *             required:
- *               - reaction
+ *               - emoji
+ *               - userId
  *             properties:
- *               reaction:
+ *               emoji:
  *                 type: string
- *                 enum: [like, love, laugh, angry, sad]
- *                 description: Reaction type
+ *                 description: Emoji reaction
+ *               userId:
+ *                 type: number
+ *                 description: User ID of the reactor
  *     responses:
  *       200:
  *         description: Reaction added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: number
+ *                   messageId:
+ *                     type: number
+ *                   emoji:
+ *                     type: string
+ *                   count:
+ *                     type: number
  *       401:
  *         description: Unauthorized
  *       404:

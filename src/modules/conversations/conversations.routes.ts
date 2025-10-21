@@ -12,7 +12,7 @@ const conversationsRouter: Router = express.Router();
 
 /**
  * @swagger
- * /conversations/new:
+ * /api/conversations/new:
  *   post:
  *     summary: Create a new conversation
  *     tags: [Conversations]
@@ -25,14 +25,52 @@ const conversationsRouter: Router = express.Router();
  *           schema:
  *             type: object
  *             required:
- *               - recipientId
+ *               - participants
  *             properties:
- *               recipientId:
- *                 type: number
- *                 description: ID of the recipient user
+ *               participants:
+ *                 type: array
+ *                 items:
+ *                   type: number
+ *                 description: Array of participant user IDs
+ *               isGroup:
+ *                 type: boolean
+ *                 description: Is group conversation
+ *               title:
+ *                 type: string
+ *                 description: Group title (optional)
+ *               group_picture:
+ *                 type: string
+ *                 description: Group picture URL (optional)
  *     responses:
  *       201:
  *         description: Conversation created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: number
+ *                 title:
+ *                   type: string
+ *                 isGroup:
+ *                   type: boolean
+ *                 ownerId:
+ *                   type: number
+ *                   nullable: true
+ *                 group_picture:
+ *                   type: string
+ *                 participants:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       id:
+ *                         type: number
+ *                       display_name:
+ *                         type: string
+ *                       profile_picture:
+ *                         type: string
  *       400:
  *         description: Bad request
  *       401:
@@ -42,7 +80,7 @@ conversationsRouter.post('/new', verifyJWT, newConversation);
 
 /**
  * @swagger
- * /conversations/{userId}:
+ * /api/conversations/{userId}:
  *   get:
  *     summary: Get all conversations for a user
  *     tags: [Conversations]
@@ -67,6 +105,28 @@ conversationsRouter.post('/new', verifyJWT, newConversation);
  *                 properties:
  *                   id:
  *                     type: number
+ *                   title:
+ *                     type: string
+ *                   isGroup:
+ *                     type: boolean
+ *                   ownerId:
+ *                     type: number
+ *                     nullable: true
+ *                   group_picture:
+ *                     type: string
+ *                   lastMessageSent:
+ *                     type: object
+ *                     nullable: true
+ *                     properties:
+ *                       id:
+ *                         type: number
+ *                       message:
+ *                         type: string
+ *                       img:
+ *                         type: string
+ *                       created_at:
+ *                         type: string
+ *                         format: date-time
  *                   participants:
  *                     type: array
  *                     items:
@@ -74,10 +134,14 @@ conversationsRouter.post('/new', verifyJWT, newConversation);
  *                       properties:
  *                         id:
  *                           type: number
- *                         firstName:
+ *                         username:
  *                           type: string
- *                         lastName:
+ *                         display_name:
  *                           type: string
+ *                         profile_picture:
+ *                           type: string
+ *                   isRead:
+ *                     type: boolean
  *       401:
  *         description: Unauthorized
  */
@@ -85,7 +149,7 @@ conversationsRouter.get('/:userId', verifyJWT, getAllConversations);
 
 /**
  * @swagger
- * /conversations/{conversationId}/read:
+ * /api/conversations/{conversationId}/read:
  *   put:
  *     summary: Mark conversation as read
  *     tags: [Conversations]
@@ -101,6 +165,13 @@ conversationsRouter.get('/:userId', verifyJWT, getAllConversations);
  *     responses:
  *       200:
  *         description: Conversation marked as read
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *       401:
  *         description: Unauthorized
  *       404:
@@ -110,7 +181,7 @@ conversationsRouter.put('/:conversationId/read', verifyJWT, readConversation);
 
 /**
  * @swagger
- * /conversations/{conversationId}:
+ * /api/conversations/{conversationId}:
  *   patch:
  *     summary: Update conversation
  *     tags: [Conversations]
@@ -132,11 +203,23 @@ conversationsRouter.put('/:conversationId/read', verifyJWT, readConversation);
  *             properties:
  *               title:
  *                 type: string
- *               isArchived:
- *                 type: boolean
+ *               img:
+ *                 type: string
+ *                 description: Group picture URL (optional)
  *     responses:
  *       200:
  *         description: Conversation updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: number
+ *                 title:
+ *                   type: string
+ *                 group_picture:
+ *                   type: string
  *       401:
  *         description: Unauthorized
  *       404:
@@ -146,7 +229,7 @@ conversationsRouter.patch('/:conversationId', verifyJWT, updateConversation);
 
 /**
  * @swagger
- * /conversations/{conversationId}:
+ * /api/conversations/{conversationId}:
  *   delete:
  *     summary: Delete conversation
  *     tags: [Conversations]
@@ -162,6 +245,13 @@ conversationsRouter.patch('/:conversationId', verifyJWT, updateConversation);
  *     responses:
  *       200:
  *         description: Conversation deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
  *       401:
  *         description: Unauthorized
  *       404:

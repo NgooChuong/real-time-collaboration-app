@@ -10,5 +10,5 @@ export const allowedOrigins = [
 // Add production origins here when deploying
 if (process.env.NODE_ENV === 'production') {
   // Add your production domains here
-  // allowedOrigins.push('https://yourdomain.com');
+  allowedOrigins.push('https://real-time-collaboration-app-d8lx.onrender.com');
 }
