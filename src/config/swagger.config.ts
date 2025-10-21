@@ -1,6 +1,7 @@
 import { Express } from 'express';
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
+const isProduction = process.env.NODE_ENV === 'production';
 const options = {
   definition: {
     openapi: '3.1.0',
@@ -12,12 +13,10 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:3000',
-        description: 'Development server',
-      },
-      {
-        url: 'https://real-time-collaboration-app-d8lx.onrender.com',
-        description: 'Production server',
+        url: isProduction
+          ? 'https://real-time-collaboration-app-d8lx.onrender.com'
+          : 'http://localhost:3000',
+        description: isProduction ? 'Production server' : 'Development server',
       },
     ],
     components: {
