@@ -4,13 +4,20 @@ import { WSMessage, WSReaction } from '../types';
 
 const APPID = process.env.APPID || 'default-app-id';
 const activeUsers = new Set<number>();
+const isProduction = process.env.NODE_ENV === 'production';
 
 // Redis clients
 const subscriber = createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379',
+  socket: isProduction
+    ? { tls: true, rejectUnauthorized: false }
+    : undefined,
 });
 const publisher = createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379',
+  socket: isProduction
+    ? { tls: true, rejectUnauthorized: false }
+    : undefined,
 });
 
 subscriber.on('error', (err) => console.error('Redis Subscriber Error', err));
