@@ -29,12 +29,12 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Backend Deploy
+      - name: Render Backend Deploy
         if: success()
         run: |
-          curl "$RENDER_DEPLOY_HOOK_API_SERVER"
+          curl "${{ secrets.RENDER_DEPLOY_HOOK_API_SERVER }}"
 
-      - name: Frontend Deploy
+      - name: Render Frontend Deploy
         if: success()
         run: |
-          curl "$RENDER_DEPLOY_HOOK_CLIENT"
+          curl "${{ secrets.RENDER_DEPLOY_HOOK_CLIENT }}"
