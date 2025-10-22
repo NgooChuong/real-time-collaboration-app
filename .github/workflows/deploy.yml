@@ -32,7 +32,7 @@ jobs:
       - name: Backend Deploy
         if: success()
         run: |
-          curl "$RENDER_DEPLOY_HOOK_API"
+          curl "$RENDER_DEPLOY_HOOK_API_SERVER"
 
       - name: Frontend Deploy
         if: success()
