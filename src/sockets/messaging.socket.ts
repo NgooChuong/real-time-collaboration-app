@@ -9,15 +9,11 @@ const isProduction = process.env.NODE_ENV === 'production';
 // Redis clients
 const subscriber = createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379',
-  socket: isProduction
-    ? { tls: true, rejectUnauthorized: false }
-    : undefined,
+  socket: isProduction ? { tls: true, rejectUnauthorized: false } : undefined,
 });
 const publisher = createClient({
   url: process.env.REDIS_URL || 'redis://localhost:6379',
-  socket: isProduction
-    ? { tls: true, rejectUnauthorized: false }
-    : undefined,
+  socket: isProduction ? { tls: true, rejectUnauthorized: false } : undefined,
 });
 
 subscriber.on('error', (err) => console.error('Redis Subscriber Error', err));
