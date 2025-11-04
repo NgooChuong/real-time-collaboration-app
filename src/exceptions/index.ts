@@ -1,5 +1,6 @@
 // Core
-export { AppError, createAppError, isAppError } from './AppError';
+export type { AppError } from './AppError';
+export { createAppError, isAppError } from './AppError';
 export { HttpStatusCodes } from './HttpStatusCodes';
 export { ErrorTypes } from './ErrorTypes';
 

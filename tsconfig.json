@@ -15,7 +15,8 @@
       "config": ["config/index.ts"],
       "types": ["types/index.ts"]
     },
-    "outDir": "dist"
+    "outDir": "dist",
+    "isolatedModules": true
   },
   "include": ["src"]
 }

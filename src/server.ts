@@ -1,6 +1,6 @@
 import http from 'http';
 import { Server as SocketIOServer } from 'socket.io';
-import registerMessagingSocket from './sockets/messaging.socket';
+import registerMessagingSocket from './sockets/socket';
 import { allowedOrigins } from './config/allowedOrigins';
 import { createApp } from './app';
 
