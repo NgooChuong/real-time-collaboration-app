@@ -199,11 +199,18 @@ export const getMessagesInConversation = async (
           }
         : null;
 
-      const counts = m.reactions.reduce<Record<string, number>>((acc, r) => {
-        const key = r.emoji ?? '';
-        acc[key] = (acc[key] || 0) + 1;
-        return acc;
-      }, {});
+      type Reaction = {
+        emoji: string | null;
+      };
+
+      const counts = m.reactions.reduce(
+        (acc: Record<string, number>, r: Reaction) => {
+          const key = r.emoji ?? '';
+          acc[key] = (acc[key] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      );
       const reactions = Object.entries(counts).map(([emoji, count]) => ({
         emoji,
         count,
