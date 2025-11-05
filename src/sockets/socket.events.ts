@@ -13,21 +13,21 @@ export enum SocketEvents {
   USER_DISCONNECTED = 'user-disconnected',
 
   // Call related events
- // Call flow
-  CALL_START = 'call-start',           // Client → Server
-  INCOMING_CALL = 'incoming-call',     // Server → Callee
-  CALL_ACCEPT = 'call-accept',         // Client → Server (giữ lại, vì client cần gửi)
-  CALL_ACCEPTED = 'call-accepted',     // Server → Caller
-  CALL_REJECT = 'call-reject',         // Client → Server
-  CALL_REJECTED = 'call-rejected',     // Server → Caller
-  CALL_END = 'call-end',               // Client → Server
-  CALL_ENDED = 'call-ended',           // Server → Other
-  CALL_ERROR = 'call-error',           // Server → Client
+  // Call flow
+  CALL_START = 'call-start', // Client → Server
+  INCOMING_CALL = 'incoming-call', // Server → Callee
+  CALL_ACCEPT = 'call-accept', // Client → Server (giữ lại, vì client cần gửi)
+  CALL_ACCEPTED = 'call-accepted', // Server → Caller
+  CALL_REJECT = 'call-reject', // Client → Server
+  CALL_REJECTED = 'call-rejected', // Server → Caller
+  CALL_END = 'call-end', // Client → Server
+  CALL_ENDED = 'call-ended', // Server → Other
+  CALL_ERROR = 'call-error', // Server → Client
 
   // WebRTC
-  WEBRTC_OFFER = 'webrtc-offer',       // Bidirectional
-  WEBRTC_ANSWER = 'webrtc-answer',     // Bidirectional
-  WEBRTC_ICE = 'webrtc-ice',           // Bidirectional
+  WEBRTC_OFFER = 'webrtc-offer', // Bidirectional
+  WEBRTC_ANSWER = 'webrtc-answer', // Bidirectional
+  WEBRTC_ICE = 'webrtc-ice', // Bidirectional
 }
 
 export default SocketEvents;

@@ -18,8 +18,12 @@ publisher.on('error', (err) => console.error('Redis Publisher Error', err));
 
 // Start connecting to Redis (non-blocking)
 // Consumers may await these if they need to ensure connection before proceeding.
-subscriber.connect().catch((err) => console.error('Subscriber connect error', err));
-publisher.connect().catch((err) => console.error('Publisher connect error', err));
+subscriber
+  .connect()
+  .catch((err) => console.error('Subscriber connect error', err));
+publisher
+  .connect()
+  .catch((err) => console.error('Publisher connect error', err));
 
 export async function connectRedis(): Promise<void> {
   await Promise.all([subscriber.connect(), publisher.connect()]);

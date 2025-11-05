@@ -1,7 +1,14 @@
 // test/video-call/call-end.test.ts
-import { createTestClient, waitForConnect, waitForEvent } from '../utils/test-client';
+import {
+  createTestClient,
+  waitForConnect,
+  waitForEvent,
+} from '../utils/test-client';
 import { SocketEvents } from '../../src/sockets/socket.events';
-import type { CallAcceptedPayload, CallEndedPayload } from '../../src/types/call.type';
+import type {
+  CallAcceptedPayload,
+  CallEndedPayload,
+} from '../../src/types/call.type';
 
 describe('Call End Flow', () => {
   let clientA: ReturnType<typeof createTestClient>;
@@ -25,7 +32,10 @@ describe('Call End Flow', () => {
     await waitForEvent(clientB, SocketEvents.INCOMING_CALL);
     clientB.emit(SocketEvents.CALL_ACCEPT, { fromUserId: 51 });
 
-    const accepted: CallAcceptedPayload = await waitForEvent(clientA, SocketEvents.CALL_ACCEPTED);
+    const accepted: CallAcceptedPayload = await waitForEvent(
+      clientA,
+      SocketEvents.CALL_ACCEPTED,
+    );
     expect(accepted.fromUserId).toBe(51);
 
     // 2. Alice kết thúc cuộc gọi
@@ -35,7 +45,10 @@ describe('Call End Flow', () => {
     });
 
     // 3. Bob nhận thông báo kết thúc
-    const ended: CallEndedPayload = await waitForEvent(clientB, SocketEvents.CALL_ENDED);
+    const ended: CallEndedPayload = await waitForEvent(
+      clientB,
+      SocketEvents.CALL_ENDED,
+    );
     expect(ended.fromUserId).toBe(50);
   }, 10000);
 });

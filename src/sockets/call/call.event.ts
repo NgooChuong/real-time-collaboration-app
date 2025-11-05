@@ -18,15 +18,16 @@ const emitCallError = (socket: Socket, error: string) => {
 const emitIncomingCall = (
   io: SocketIOServer,
   toUserId: number,
-  payload: IncomingCallPayload
+  payload: IncomingCallPayload,
 ) => {
+  console.log('[EMIT] INCOMING_CALL to room:', payload.conversationId);
   io.to(toUserId.toString()).emit(SocketEvents.INCOMING_CALL, payload);
 };
 
-const emitCallAccepted = (
+const emitCallAccept = (
   io: SocketIOServer,
   toUserId: number,
-  payload: CallAcceptedPayload
+  payload: CallAcceptedPayload,
 ) => {
   io.to(toUserId.toString()).emit(SocketEvents.CALL_ACCEPTED, payload);
 };
@@ -34,7 +35,7 @@ const emitCallAccepted = (
 const emitCallRejected = (
   io: SocketIOServer,
   toUserId: number,
-  payload: CallRejectedPayload
+  payload: CallRejectedPayload,
 ) => {
   io.to(toUserId.toString()).emit(SocketEvents.CALL_REJECTED, payload);
 };
@@ -42,7 +43,7 @@ const emitCallRejected = (
 const emitWebRTCOffer = (
   io: SocketIOServer,
   toUserId: number,
-  payload: WebRTCOfferPayload
+  payload: WebRTCOfferPayload,
 ) => {
   io.to(toUserId.toString()).emit(SocketEvents.WEBRTC_OFFER, payload);
 };
@@ -50,7 +51,7 @@ const emitWebRTCOffer = (
 const emitWebRTCAnswer = (
   io: SocketIOServer,
   toUserId: number,
-  payload: WebRTCAnswerPayload
+  payload: WebRTCAnswerPayload,
 ) => {
   io.to(toUserId.toString()).emit(SocketEvents.WEBRTC_ANSWER, payload);
 };
@@ -58,7 +59,7 @@ const emitWebRTCAnswer = (
 const emitWebRTCIce = (
   io: SocketIOServer,
   toUserId: number,
-  payload: WebRTCIcePayload
+  payload: WebRTCIcePayload,
 ) => {
   io.to(toUserId.toString()).emit(SocketEvents.WEBRTC_ICE, payload);
 };
@@ -66,7 +67,7 @@ const emitWebRTCIce = (
 const emitCallEnded = (
   io: SocketIOServer,
   toUserId: number,
-  payload: CallEndedPayload
+  payload: CallEndedPayload,
 ) => {
   io.to(toUserId.toString()).emit(SocketEvents.CALL_ENDED, payload);
 };
@@ -74,7 +75,7 @@ const emitCallEnded = (
 export {
   emitCallError,
   emitIncomingCall,
-  emitCallAccepted,
+  emitCallAccept,
   emitCallRejected,
   emitWebRTCOffer,
   emitWebRTCAnswer,

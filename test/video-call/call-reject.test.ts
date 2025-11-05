@@ -1,5 +1,9 @@
 // test/video-call/call-reject.test.ts
-import { createTestClient, waitForConnect, waitForEvent } from '../utils/test-client';
+import {
+  createTestClient,
+  waitForConnect,
+  waitForEvent,
+} from '../utils/test-client';
 import { SocketEvents } from '../../src/sockets/socket.events';
 import type { CallRejectedPayload } from '../../src/types/call.type';
 
@@ -19,12 +23,18 @@ describe('Call Reject', () => {
   });
 
   test('should reject call', async () => {
-    clientA.emit(SocketEvents.CALL_START, { toUserId: 11, conversationId: 'x' });
+    clientA.emit(SocketEvents.CALL_START, {
+      toUserId: 11,
+      conversationId: 'x',
+    });
 
     await waitForEvent(clientB, SocketEvents.INCOMING_CALL);
     clientB.emit(SocketEvents.CALL_REJECT, { fromUserId: 11 });
 
-    const rejected: CallRejectedPayload = await waitForEvent(clientA, SocketEvents.CALL_REJECTED);
+    const rejected: CallRejectedPayload = await waitForEvent(
+      clientA,
+      SocketEvents.CALL_REJECTED,
+    );
     expect(rejected.fromUserId).toBe(11);
   });
 });

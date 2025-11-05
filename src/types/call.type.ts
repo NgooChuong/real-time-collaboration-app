@@ -5,7 +5,7 @@ type CallPayload = {
 };
 
 type CallResponsePayload = {
-  fromUserId: number;
+  toUserId: number; // ID của người gọi ban đầu để gửi phản hồi về
   conversationId?: string | number;
 };
 
@@ -22,38 +22,38 @@ type CallErrorPayload = {
 };
 
 type CallAcceptedPayload = {
-  fromUserId: number;  // Người chấp nhận
+  fromUserId: number; // Người chấp nhận
 };
 
 type CallRejectedPayload = {
-  fromUserId: number;  // Người từ chối
+  fromUserId: number; // Người từ chối
 };
 
 type IncomingCallPayload = {
-  fromUserId: number;  // Người gọi
+  fromUserId: number; // Người gọi
   conversationId: string | number;
 };
 
 type WebRTCOfferPayload = {
   offer: RTCSessionDescriptionInit;
-  fromUserId: number;  // Người gửi offer
+  fromUserId: number; // Người gửi offer
   conversationId: string | number;
 };
 
 type WebRTCAnswerPayload = {
   answer: RTCSessionDescriptionInit;
-  fromUserId: number;  // Người gửi answer
+  fromUserId: number; // Người gửi answer
   conversationId: string | number;
 };
 
 type WebRTCIcePayload = {
   candidate: RTCIceCandidateInit;
-  fromUserId: number;  // Người gửi candidate
+  fromUserId: number; // Người gửi candidate
   conversationId: string | number;
 };
 
 type CallEndedPayload = {
-  fromUserId: number;  // Người kết thúc
+  fromUserId: number; // Người kết thúc
 };
 
 export type {

@@ -1,7 +1,15 @@
 import { Server as SocketIOServer, Socket } from 'socket.io';
 import SocketEvents from 'sockets/socket.events';
-import { handleCallAccept, handleCallEnd, handleCallReject, handleCallStart, handleWebRTCAnswer, handleWebRTCIce, handleWebRTCOffer } from './call.socket';
-
+import { CallAcceptedPayload } from 'types/call.type';
+import {
+  handleCallAccept,
+  handleCallEnd,
+  handleCallReject,
+  handleCallStart,
+  handleWebRTCAnswer,
+  handleWebRTCIce,
+  handleWebRTCOffer,
+} from './call.socket';
 
 /**
  * Đăng ký tất cả event liên quan đến Video Call
@@ -16,33 +24,36 @@ export const registerVideoCallEvents = (io: SocketIOServer) => {
 
     // === CALL FLOW ===
     socket.on(SocketEvents.CALL_START, (data) =>
-      handleCallStart(socket, io, id, data)
+      handleCallStart(socket, io, id, data),
     );
 
     socket.on(SocketEvents.CALL_ACCEPT, (data) =>
-      handleCallAccept(io, id, data)
+      handleCallAccept(io, id, data),
     );
+
+    // Xử lý khi Alice nhận được sự kiện CALL_ACCEPTED từ Bob
+    socket.on(SocketEvents.CALL_ACCEPTED, (data: CallAcceptedPayload) => {
+      console.log('[SOCKET] Got call accepted from:', data.fromUserId);
+      // Không cần xử lý gì thêm vì data đã có fromUserId là ID của Bob
+      // Test case sẽ tự verify thông qua waitForEvent
+    });
 
     socket.on(SocketEvents.CALL_REJECT, (data) =>
-      handleCallReject(io, id, data)
+      handleCallReject(io, id, data),
     );
 
-    socket.on(SocketEvents.CALL_END, (data) =>
-      handleCallEnd(io, id, data)
-    );
+    socket.on(SocketEvents.CALL_END, (data) => handleCallEnd(io, id, data));
 
     // === WEBRTC SIGNALING ===
     socket.on(SocketEvents.WEBRTC_OFFER, (data) =>
-      handleWebRTCOffer(io, id, data)
+      handleWebRTCOffer(io, id, data),
     );
 
     socket.on(SocketEvents.WEBRTC_ANSWER, (data) =>
-      handleWebRTCAnswer(io, id, data)
+      handleWebRTCAnswer(io, id, data),
     );
 
-    socket.on(SocketEvents.WEBRTC_ICE, (data) =>
-      handleWebRTCIce(io, id, data)
-    );
+    socket.on(SocketEvents.WEBRTC_ICE, (data) => handleWebRTCIce(io, id, data));
 
     // XỬ LÝ NGẮT KẾT NỐI
     socket.on(SocketEvents.DISCONNECT, () => {

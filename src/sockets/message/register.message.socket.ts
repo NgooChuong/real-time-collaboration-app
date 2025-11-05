@@ -49,6 +49,7 @@ const registerMessagingSocket = (io: SocketIOServer) => {
     socket.on(
       SocketEvents.JOIN_CONVERSATION,
       (conversationId: string | number) => {
+        console.log(`[SOCKET] joined room: ${conversationId}`);
         socket.join(conversationId.toString());
       },
     );

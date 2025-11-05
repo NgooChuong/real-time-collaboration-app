@@ -16,11 +16,20 @@ export const waitForConnect = (socket: Socket): Promise<void> => {
   });
 };
 
-export const waitForEvent = <T = unknown>(
+export const waitForEvent = <T>(
   socket: Socket,
-  event: SocketEvents
+  event: SocketEvents,
 ): Promise<T> => {
-  return new Promise((resolve) => {
-    socket.once(event, resolve);
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => {
+      console.error(`[TEST] TIMEOUT waiting for event: ${event}`);
+      reject(new Error(`Timeout: ${event}`));
+    }, 10000);
+
+    socket.once(event, (data) => {
+      clearTimeout(timeout);
+      console.log(`[TEST] RECEIVED ${event}:`, data);
+      resolve(data);
+    });
   });
 };

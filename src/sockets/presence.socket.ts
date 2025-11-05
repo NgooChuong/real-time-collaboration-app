@@ -6,7 +6,7 @@ const registerPresenceSocket = (io: SocketIOServer) => {
   io.on(SocketEvents.CONNECTION, (socket: Socket) => {
     const id = socket.handshake.query.id as string;
     if (!id) return;
-  const numericId = Number.parseInt(id, 10);
+    const numericId = Number.parseInt(id, 10);
 
     console.log('WELCOME', id);
     addActiveUser(numericId);

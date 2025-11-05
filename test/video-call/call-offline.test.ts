@@ -1,5 +1,9 @@
 // test/video-call/call-offline.test.ts
-import { createTestClient, waitForConnect, waitForEvent } from '../utils/test-client';
+import {
+  createTestClient,
+  waitForConnect,
+  waitForEvent,
+} from '../utils/test-client';
 import { SocketEvents } from '../../src/sockets/socket.events';
 import type { CallErrorPayload } from '../../src/types/call.type';
 
@@ -14,9 +18,15 @@ describe('Call Offline User', () => {
   afterAll(() => clientA?.disconnect());
 
   test('should return error when user offline', async () => {
-    clientA.emit(SocketEvents.CALL_START, { toUserId: 999, conversationId: 'x' });
+    clientA.emit(SocketEvents.CALL_START, {
+      toUserId: 999,
+      conversationId: 'x',
+    });
 
-    const error: CallErrorPayload = await waitForEvent(clientA, SocketEvents.CALL_ERROR);
+    const error: CallErrorPayload = await waitForEvent(
+      clientA,
+      SocketEvents.CALL_ERROR,
+    );
     expect(error.error).toBe('User offline');
   });
 });
