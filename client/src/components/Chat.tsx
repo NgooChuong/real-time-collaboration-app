@@ -1,44 +1,45 @@
-import { useEffect, useRef, useState } from "react";
-import { useAuth } from "../contexts/AuthContext";
-import Message from "./Message";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useEffect, useRef, useState } from 'react';
+import { useAuth } from '../contexts/AuthContext';
+import Message from './Message';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import {
   useEditMessage,
   useGetMessagesInfinite,
   useNewMessage,
   useReactMessage,
-} from "../hooks/useMessages";
-import { BiArrowBack } from "react-icons/bi";
-import NewMessageInputForm from "./NewMessageInputForm";
-import { MdVerified } from "react-icons/md";
-import { useQueryClient } from "@tanstack/react-query";
-
+} from '../hooks/useMessages';
+import { BiArrowBack } from 'react-icons/bi';
+import NewMessageInputForm from './NewMessageInputForm';
+import { MdVerified } from 'react-icons/md';
+import { useQueryClient } from '@tanstack/react-query';
+import { FiPhone, FiMoreVertical } from 'react-icons/fi';
+import { useCall } from '../hooks/useCall';
 const Chat = () => {
   const navigate = useNavigate();
   const { conversationId } = useParams();
   const state = useLocation().state as ConversationState;
   const { currentUser } = useAuth();
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [messageToEdit, setMessageToEdit] = useState<Message | null>(null);
   const [messageToReply, setMessageToReply] = useState<Message | null>(null);
-  const [imgBase64, setImgBase64] = useState("");
+  const [imgBase64, setImgBase64] = useState('');
   const [showMoreClicked, setShowMoreClicked] = useState(false);
 
   const LIMIT = 20;
   const { data: messages, fetchNextPage } = useGetMessagesInfinite(
     parseInt(conversationId!),
-    LIMIT
+    LIMIT,
   );
 
   // Conversations metadata from cache
   const queryClient = useQueryClient();
   const conversations = queryClient.getQueryData<Conversation[]>([
-    "conversations",
+    'conversations',
   ]);
   const conversationMeta = conversations?.find(
-    (c) => c.id === parseInt(conversationId!)
+    (c) => c.id === parseInt(conversationId!),
   );
   const isGroup = conversationMeta?.isGroup ?? false;
   const participants = conversationMeta?.participants ?? [];
@@ -59,7 +60,7 @@ const Chat = () => {
     recipientIds,
     message,
     imgBase64,
-    messageToReply?.id
+    messageToReply?.id,
   );
 
   const { mutate: editMessage, isSuccess: messageHasBeenUpdated } =
@@ -68,13 +69,13 @@ const Chat = () => {
   const { mutate: reactToMessage } = useReactMessage(
     parseInt(conversationId!),
     currentUser!.id,
-    recipientIds[0] ?? state?.recipient.id
+    recipientIds[0] ?? state?.recipient.id,
   );
 
   useEffect(() => {
     setMessage(() => {
       if (messageToEdit?.message) return messageToEdit.message;
-      return "";
+      return '';
     });
     inputRef.current?.focus();
   }, [messageToEdit]);
@@ -87,8 +88,8 @@ const Chat = () => {
 
   const sendMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (message.trim() === "" && imgBase64 === "") {
-      setMessage("");
+    if (message.trim() === '' && imgBase64 === '') {
+      setMessage('');
       return;
     }
     newMessage();
@@ -96,16 +97,16 @@ const Chat = () => {
 
   const updateMessage = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (message.trim() === "" || !messageToEdit?.id) {
-      setMessage("");
+    if (message.trim() === '' || !messageToEdit?.id) {
+      setMessage('');
       return;
     }
     editMessage({ messageId: messageToEdit.id, message });
   };
 
   useEffect(() => {
-    setMessage("");
-    setImgBase64("");
+    setMessage('');
+    setImgBase64('');
     setMessageToEdit(null);
     setMessageToReply(null);
     inputRef.current?.focus();
@@ -121,14 +122,48 @@ const Chat = () => {
   }, [messages]);
 
   useEffect(() => {
-    setMessage("");
+    setMessage('');
     setMessageToEdit(null);
     setMessageToReply(null);
-    setImgBase64("");
+    setImgBase64('');
   }, [messageHasBeenSent, messageHasBeenUpdated]);
 
   const handleAddReaction = (messageId: number, emoji: string) => {
     reactToMessage({ messageId, emoji });
+  };
+
+  const {
+    startCall,
+    isCalling,
+    isInCall,
+    remoteStreams,
+    localStream,
+    onIncomingCall,
+    acceptCall,
+    endCall,
+  } = useCall({
+    currentUserId: currentUser!.id,
+    recipientIds,
+    conversationId: conversationId!,
+  });
+  useEffect(() => {
+    onIncomingCall((data) => {
+      if (confirm(`Cuộc gọi từ ${data.fromUserId}. Chấp nhận?`)) {
+        acceptCall();
+      }
+    });
+  }, [onIncomingCall, acceptCall]);
+  const startVideoCall = async () => {
+    try {
+      await startCall(); // ĐÃ CÓ TẤT CẢ: socket, stream, offer, ICE
+      console.log('Video call started!');
+    } catch (err) {
+      console.error('Failed to start call:', err);
+    }
+  };
+
+  const openConversationMenu = () => {
+    // Mở menu: xóa, chặn, báo cáo...
   };
 
   return (
@@ -139,7 +174,7 @@ const Chat = () => {
           className="hover:bg-neutral-200 h-11 aspect-square flex items-center justify-center rounded-full p-2.5 sm:hidden dark:text-white dark:hover:bg-neutral-800"
           onClick={() => navigate(-1)}
         >
-          <BiArrowBack size={"100%"} />
+          <BiArrowBack size={'100%'} />
         </button>
         <button
           type="button"
@@ -157,12 +192,37 @@ const Chat = () => {
           ) : isGroup ? (
             <span className="truncate">
               {conversationMeta?.title ||
-                participants.map((p) => p.display_name).join(", ")}
+                participants.map((p) => p.display_name).join(', ')}
             </span>
           ) : (
             state?.recipient.title
           )}
         </button>
+        <div className="flex items-center gap-2 ml-auto">
+          {/* Icon gọi điện */}
+          <button
+            onClick={startVideoCall}
+            disabled={isCalling || isInCall}
+            className={`p-2 rounded-full transition-colors ${
+              isCalling || isInCall
+                ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                : 'bg-green-500 hover:bg-green-600 text-white'
+            }`}
+            title="Gọi video"
+          >
+            <FiPhone className="w-5 h-5" />
+            {isCalling && <span className="ml-2">Đang gọi...</span>}
+          </button>
+
+          {/* Icon menu 3 chấm */}
+          <button
+            onClick={() => openConversationMenu()}
+            className="p-2 rounded-full hover:bg-neutral-200 dark:hover:bg-neutral-800 transition-colors"
+            aria-label="More options"
+          >
+            <FiMoreVertical className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 min-h-0 w-full flex flex-col justify-end">
@@ -170,18 +230,20 @@ const Chat = () => {
           ref={messagesContainerRef}
           className="grid gap-2 p-2 overflow-y-auto"
         >
-          {messages?.pages && messages.pages.length > 0 && 
-           (messages.pages[messages.pages.length - 1]?.length ?? 0) >= LIMIT && (
-            <button
-              onClick={() => {
-                setShowMoreClicked(true);
-                fetchNextPage();
-              }}
-              className="cursor-pointer w-fit px-2 py-1 text-blue-600 hover:underline mx-auto"
-            >
-              Show More
-            </button>
-          )}
+          {messages?.pages &&
+            messages.pages.length > 0 &&
+            (messages.pages[messages.pages.length - 1]?.length ?? 0) >=
+              LIMIT && (
+              <button
+                onClick={() => {
+                  setShowMoreClicked(true);
+                  fetchNextPage();
+                }}
+                className="cursor-pointer w-fit px-2 py-1 text-blue-600 hover:underline mx-auto"
+              >
+                Show More
+              </button>
+            )}
           {(() => {
             const orderedMessages: Message[] =
               messages?.pages
@@ -253,6 +315,40 @@ const Chat = () => {
           imgBase64={imgBase64}
           setImgBase64={setImgBase64}
         />
+      )}
+      {isInCall && (
+        <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
+          {/* Local video */}
+          {localStream.length > 0 && (
+            <video
+              autoPlay
+              muted
+              playsInline
+              ref={(video) =>
+                video && (video.srcObject = new MediaStream(localStream))
+              }
+              className="w-40 h-40 rounded-full object-cover absolute bottom-4 right-4 border-4 border-white"
+            />
+          )}
+
+          {/* Remote videos */}
+          {remoteStreams.map((stream) => (
+            <video
+              key={stream.id}
+              autoPlay
+              playsInline
+              ref={(video) => video && (video.srcObject = stream)}
+              className="w-full h-full object-cover"
+            />
+          ))}
+
+          <button
+            onClick={endCall}
+            className="absolute top-4 right-4 bg-red-600 text-white p-3 rounded-full"
+          >
+            Kết thúc
+          </button>
+        </div>
       )}
     </div>
   );

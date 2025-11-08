@@ -2,7 +2,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { BiArrowBack } from "react-icons/bi";
 import { useGetConversation } from "../hooks/useConversations";
 import { useAuth } from "../contexts/AuthContext";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { FiMoreHorizontal } from "react-icons/fi";
 import ConversationInfoDropdown from "./ConversationInfoDropdown";
 import EditConversationModal from "./EditConversationModal";
