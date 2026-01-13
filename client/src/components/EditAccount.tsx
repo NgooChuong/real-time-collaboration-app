@@ -1,11 +1,12 @@
-import { FormEvent, useRef, useState } from "react";
-import { useEditAccount } from "../hooks/auth/useEditAccount";
-import Resizer from "react-image-file-resizer";
+import { FormEvent, useRef, useState } from 'react';
+import { useEditAccount } from '../hooks/auth/useEditAccount';
+import Resizer from 'react-image-file-resizer';
 // @ts-expect-error https://github.com/onurzorluer/react-image-file-resizer/issues/68
 const resizer: typeof Resizer = Resizer.default || Resizer;
-import { useAuth } from "../contexts/AuthContext";
-import { FaCamera } from "react-icons/fa";
-import Input from "./ui/Input";
+import { useAuth } from '../contexts/AuthContext';
+import { FaCamera } from 'react-icons/fa';
+import Input from './ui/Input';
+import posthog from 'posthog-js';
 
 const EditAccount = () => {
   const {
@@ -36,13 +37,13 @@ const EditAccount = () => {
         file,
         400,
         400,
-        "JPEG",
+        'JPEG',
         80,
         0,
         (uri) => {
           setProfileImgBase64(uri as string);
         },
-        "base64"
+        'base64',
       );
     } else {
       setProfileImgBase64(null);
@@ -51,8 +52,17 @@ const EditAccount = () => {
 
   const resetForm = () => {
     setProfileImgBase64(null);
-    displayNameRef.current!.value = "";
-    usernameRef.current!.value = "";
+    displayNameRef.current!.value = '';
+    usernameRef.current!.value = '';
+  };
+
+  const testPostHog = () => {
+    posthog.capture('test_domain_posthog', {
+      username: currentUser?.display_name,
+      email: currentUser?.username,
+      view: 'EditAccount',
+
+    });
   };
 
   return (
@@ -64,7 +74,7 @@ const EditAccount = () => {
               src={
                 profileImgBase64 ||
                 currentUser?.profile_picture ||
-                "default-pfp.jpg"
+                'default-pfp.jpg'
               }
               alt="uploaded image"
               className="object-cover w-full h-full"
@@ -120,6 +130,12 @@ const EditAccount = () => {
           </button>
           <button className="bg-blue-600 px-6 py-2 rounded-full text-white">
             Save
+          </button>
+          <button
+            className="bg-blue-600 px-6 py-2 rounded-full text-white"
+            onClick={testPostHog}
+          >
+            Test posthog
           </button>
         </div>
       </form>

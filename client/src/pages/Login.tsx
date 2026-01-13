@@ -4,6 +4,7 @@ import useLogin from "../hooks/auth/useLogin";
 import { RotatingLines } from "react-loader-spinner";
 import Input from "../components/ui/Input";
 import { FiUser, FiLock, FiArrowRight } from "react-icons/fi";
+import posthog from 'posthog-js';
 
 const Login = () => {
   const { mutate: login, isLoading, isError, error } = useLogin();
@@ -11,6 +12,7 @@ const Login = () => {
   const passwordRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    posthog.capture('user_logged_in');
     e.preventDefault();
     const username = usernameRef?.current?.value.trim().toLowerCase() as string;
     const password = passwordRef?.current?.value as string;

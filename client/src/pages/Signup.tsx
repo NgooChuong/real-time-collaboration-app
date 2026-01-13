@@ -4,7 +4,7 @@ import useSignup from "../hooks/auth/useSignup";
 import { RotatingLines } from "react-loader-spinner";
 import Input from "../components/ui/Input";
 import { FiUser, FiLock, FiArrowRight, FiUserPlus } from "react-icons/fi";
-
+import posthog from 'posthog-js';
 const Signup = ({}) => {
   const { mutate: signup, isLoading, isError, error } = useSignup();
   const displayNameRef = useRef<HTMLInputElement>(null);
@@ -18,6 +18,7 @@ const Signup = ({}) => {
     const username = usernameRef?.current?.value.trim().toLowerCase() as string;
     const password = passwordRef?.current?.value as string;
     const repeatPassword = repeatPasswordRef?.current?.value as string;
+    posthog.capture('user_signed_up');
     signup({ display_name, username, password, repeatPassword });
   };
 
