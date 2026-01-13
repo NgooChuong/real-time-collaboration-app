@@ -30,7 +30,7 @@ posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, {
   },
   debug: false,
   loaded: (ph) => {
-    if (process.env.NODE_ENV === 'development') ph.debug();
+     ph.debug();
   },
 });
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
