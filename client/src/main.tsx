@@ -16,11 +16,11 @@ const queryClient = new QueryClient();
 posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
   person_profiles: 'identified_only',
-  persistence_name: 'posthog_client_id',
-  autocapture: false,
+  persistence_name: 'atomsolution',
+  autocapture: true,
   opt_out_capturing_by_default: false,
   cookie_expiration: 365,
-  capture_pageview: false,
+  capture_pageview: true,
   persistence: 'localStorage',
   disable_session_recording: false,
   enable_recording_console_log: true,
@@ -28,7 +28,7 @@ posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, {
     maskAllInputs: true,
     maskTextSelector: '*',
   },
-  debug: false,
+  debug: import.meta.env.MODE !== "production",
   loaded: (ph) => {
      ph.debug();
   },
